@@ -1,7 +1,7 @@
 import { reservedWords } from "./index";
 
-export type TOKEN_CLASSES = 'Num' | 'Lit' | 'id' | 'Comentário' | 'EOF'| 'OPR' | 'RCB' | 'OPM' | 'AB_P' | 'FC_P' | 'PT_V' | 'ERRO' | 'Vir' | 'Ignorar' | typeof reservedWords[number];
-type TOKEN_TYPES = 'inteiro' | 'real' | 'literal' | typeof reservedWords[number];
+export type TOKEN_CLASSES = 'Num' | 'Lit' | 'id' | 'Comentário' | 'EOF'| 'OPR' | 'RCB' | 'OPM' | 'AB_P' | 'FC_P' | 'PT_V' | 'ERRO' | 'VIR' | 'esp' | 'tab' | 'salt' | typeof reservedWords[number];
+export type TOKEN_TYPES = 'inteiro' | 'real' | 'literal' | typeof reservedWords[number];
 
 class TOKEN {
   classe: TOKEN_CLASSES;

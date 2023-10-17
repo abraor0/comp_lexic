@@ -18,13 +18,15 @@ const stateClasses = {
   'q20': 'AB_P',
   'q21': 'FC_P',
   'q22': 'PT_V',
-  'q23': 'Ignorar',
-  'q24': 'ERRO',
-  'q25': 'Vir'
+  'q23': 'esp',
+  'q24': 'tab',
+  'q25': 'salt',
+  'q26': 'VIR',
+  'q27': 'ERRO',
 } as {[index: string]: TOKEN_CLASSES};
 
-import { alphabet, digits, letters, symbolTable } from "./index";
-import TOKEN, { TOKEN_CLASSES } from "./token";
+import { EOF, alphabet, digits, letters, symbolTable } from "./index";
+import TOKEN, { TOKEN_CLASSES, TOKEN_TYPES } from "./token";
 
 function transition(currentState: string, char: string): string {
   // tratar EOF dps
@@ -34,14 +36,17 @@ function transition(currentState: string, char: string): string {
       else if (char === '"') return 'q3';
       else if (digits.includes(char)) return 'q5';
       else if (letters.includes(char)) return 'q11';
+      else if (char === EOF) return 'q12';
       else if (char === '<') return 'q13';
       else if (char === '>') return 'q17';
       else if (['+', '-', '/', '*'].includes(char)) return 'q19';
       else if (char === '(') return 'q20';
       else if (char === ')') return 'q21';
       else if (char === ';') return 'q22';
-      else if ([ , '\n', '\t'].includes(char)) return 'q23';
-      else if (char === ',') return 'q25';
+      else if (char === ' ') return 'q23';
+      else if (char === '\t') return 'q24';
+      else if (char === '\n') return 'q25';
+      else if (char === ',') return 'q26';
     case 'q1':
       if (alphabet.includes(char) && char !== '}') return 'q1';
       else if (char === '}') return 'q2';
@@ -55,9 +60,61 @@ function transition(currentState: string, char: string): string {
     case 'q5':
       if (digits.includes(char)) return 'q5';
       else if (char === '.') return 'q6';
-      else if (char === 'E' || char === 'e') return 'q7';
+      else if (char === 'E' || char === 'e') return 'q8';
+      else if (alphabet.includes(char)) return 'q0';
     case 'q6':
       if (digits.includes(char)) return 'q7';
+    case 'q7':
+      if (digits.includes(char)) return 'q7';
+      else if (char === 'E' || char === 'e') return 'q8';
+      else if (alphabet.includes(char)) return 'q0';
+    case 'q8':
+      if (['+','-'].includes(char)) return 'q9';
+      else if (digits.includes(char)) return 'q10';
+    case 'q9':
+      if (digits.includes(char)) return 'q10';
+    case 'q10':
+      if (digits.includes(char)) return 'q10';
+      else if (alphabet.includes(char)) return 'q0';
+    case 'q11':
+      if (letters.includes(char) || digits.includes(char) || char === '_') return 'q11';
+      else if (alphabet.includes(char)) return 'q0';
+    case 'q12':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q13':
+      if (char === '>') return 'q14';
+      else if (char === '=') return 'q15';
+      else if (char === '-') return 'q16';
+      else if (alphabet.includes(char)) return 'q0';
+    case 'q14':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q15':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q16':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q17':
+      if (char === '=') return 'q18';
+      else if (alphabet.includes(char)) return 'q0';
+    case 'q18':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q19':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q20':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q21':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q22':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q23':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q24':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q25':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q26':
+      if (alphabet.includes(char)) return 'q0';
+    case 'q27':
+      if (alphabet.includes(char)) return 'q0';
     default:
       return 'q24';
   }
@@ -72,10 +129,9 @@ function* Scanner(file: string) {
       --i;
       const lexeme = buffer.join();
       let classe = stateClasses[currentState];
-      let type;
+      let type: TOKEN_TYPES | null = null;
 
       if (classe === 'id') {
-        type = null;
         if (symbolTable[lexeme] !== undefined) yield symbolTable[lexeme];
         else {
           let token = new TOKEN(classe,lexeme, type);
@@ -89,7 +145,7 @@ function* Scanner(file: string) {
       
       if (classe === 'Num') {
         if(Number.isInteger(parseFloat(lexeme))) type = 'inteiro';
-        else type = 'float';
+        else type = 'real';
       }
       
       yield new TOKEN(classe, lexeme, type);
