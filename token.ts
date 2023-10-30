@@ -5,10 +5,10 @@ export type TOKEN_TYPES = 'inteiro' | 'real' | 'literal' | typeof reservedWords[
 
 class TOKEN {
   classe: TOKEN_CLASSES;
-  lexema: string;
+  lexema: string |  null;
   tipo: TOKEN_TYPES | null;
 
-  constructor(classe: TOKEN_CLASSES, lexema: string, tipo: TOKEN_TYPES | null) {
+  constructor(classe: TOKEN_CLASSES, lexema: string | null, tipo: TOKEN_TYPES | null) {
     this.classe = classe;
     this.lexema = lexema;
     this.tipo = tipo;
