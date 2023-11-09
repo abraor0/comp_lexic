@@ -3,7 +3,7 @@ import TOKEN from './token';
 import Scanner from './lexicalAnaliser';
 
 export const EOF = '@';
-export const valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,;:.!?\\*+-/(){}[]<>=\'"_ \t\n\r@';
+export const valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,;:.!?\\*+-/(){}[]<>=\'"_ \t\n\r';
 export const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 export const digits = '0123456789';
 export const stateResetters = '{"' + digits + letters
