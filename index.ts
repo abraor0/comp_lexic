@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import TOKEN from './token';
-import Scanner from './lexicalAnaliser';
+import { syntaxAnaliser } from './sintaxAnaliser';
 
 export const EOF = '@';
 export const valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,;:.!?\\*+-/(){}[]<>=\'"_ \t\n\r';
@@ -33,13 +33,7 @@ async function main() : Promise<void> {
   const file = await fs.open(`./${fileName}`);
   const fileContent = (await file.readFile()).toString() + '@';
 
-  const scanner = Scanner(fileContent);
-
-  let i = 0;
-  for(let token of scanner) {
-    if (token.classe === 'ERRO') continue;
-    console.log(token);
-  }
+  await syntaxAnaliser(fileContent);  
 }
 
 main();

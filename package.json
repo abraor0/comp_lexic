@@ -3,7 +3,8 @@
     "build": "tsc --build"
   },
   "dependencies": {
-    "@types/node": "^20.8.4"
+    "@types/node": "^20.8.4",
+    "csvtojson": "^2.0.10"
   },
   "devDependencies": {
     "typescript": "^5.2.2"

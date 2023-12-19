@@ -1,6 +1,6 @@
 const buffer: string[] = [];
 let currentState = 'q0';
-let i = 0, line = 1, column = 1;
+export let i = 0, line = 1, column = 1;
 const stateClasses = {
   'q2': 'Comentário',
   'q4': 'Lit',
