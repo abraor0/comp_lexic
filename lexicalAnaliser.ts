@@ -147,10 +147,12 @@ function* Scanner(file: string) {
   
         switch(classe) {
           case 'id':
+            //console.log(lexeme);
             if (symbolTable[lexeme] !== undefined) yield symbolTable[lexeme];
             else {
               let token = new TOKEN(classe,lexeme, null);
               symbolTable[lexeme] = token;
+              //console.log(token);
               yield token;
             }
             break;
