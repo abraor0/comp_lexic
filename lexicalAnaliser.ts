@@ -22,8 +22,20 @@ const stateClasses = {
   'q23': 'tab',
   'q24': 'salt',
   'q25': 'VIR',
-  'q26': 'EOF'
+  'q26': 'EOF',
+  'q27': 'OPR'
 } as {[index: string]: TOKEN_CLASSES};
+
+const tokenTypesMap = {
+  'OPM': (lexem: string) => lexem,
+  'OPR': (lexem: string) => {
+    if (lexem === '=') return '==';
+    else return lexem;
+  },
+  'RCB': () => '='
+} as any;
+
+export let lexicalErrHappened = false;
 
 import { EOF, valid_chars, digits, letters, symbolTable } from "./index";
 import TOKEN, { TOKEN_CLASSES, TOKEN_TYPES } from "./token";
@@ -47,6 +59,7 @@ function transition(currentState: string, char: string): string {
       else if (char === '\r') return 'q24';
       else if (char === ',') return 'q25';
       else if (char === EOF) return 'q26';
+      else if (char === '=') return 'q27'
       else if (valid_chars.includes(char)) throw new Error(`Uso inválido do caractere "${char}" na linguagem`);
       break;
     case 'q1':
@@ -121,6 +134,8 @@ function transition(currentState: string, char: string): string {
       if (valid_chars.includes(char) || char === EOF) return 'q0';
     case 'q26':
       return 'q0';
+    case 'q27':
+      if (valid_chars.includes(char) || char === EOF) return 'q0';
   }
 
   throw new Error(`Caractere "${char}" inválido na linguagem`);
@@ -146,6 +161,8 @@ function* Scanner(file: string) {
         currentState = newState;
   
         switch(classe) {
+          case 'Comentário':
+            break;
           case 'id':
             //console.log(lexeme);
             if (symbolTable[lexeme] !== undefined) yield symbolTable[lexeme];
@@ -160,7 +177,8 @@ function* Scanner(file: string) {
             yield new TOKEN(classe, lexeme, 'literal');
             break;
           case 'Num':
-            if(Number.isInteger(parseFloat(lexeme))) yield new TOKEN(classe, lexeme, 'inteiro');
+            const isOnlyAnIntWithAPoint = [...lexeme.slice(lexeme.lastIndexOf('.') + 1)].every((e) => e === '0');
+            if(Number.isInteger(parseFloat(lexeme)) && !isOnlyAnIntWithAPoint) yield new TOKEN(classe, lexeme, 'inteiro');
             else {
               yield new TOKEN(classe, lexeme, 'real');
             }
@@ -170,7 +188,9 @@ function* Scanner(file: string) {
           case 'esp':
             break;
           default:
-            yield new TOKEN(classe, lexeme, null);
+            if (tokenTypesMap[classe]) {
+              yield new TOKEN(classe, lexeme, tokenTypesMap[classe](lexeme));
+            } else yield new TOKEN(classe, lexeme, null);
             break;
         }
       }
@@ -184,6 +204,7 @@ function* Scanner(file: string) {
         currentState = 'q5';
       }
       if (e instanceof Error) {
+        lexicalErrHappened = true;
         yield new TOKEN('ERRO', null, null);
         console.log(`Erro Léxico - ${(e as Error).message} , linha ${line}, coluna ${column}`);
       } else {

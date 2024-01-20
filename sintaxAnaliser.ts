@@ -1,9 +1,10 @@
-import Scanner, { column, i, line } from './lexicalAnaliser';
+import Scanner, { column, i, lexicalErrHappened, line } from './lexicalAnaliser';
 import csv from 'csvtojson';
 import TOKEN, { TOKEN_NAMES } from './token';
-import  semantic, { generateOutput, semantic_stack } from './semanticAnaliser';
+import  semantic, { generateOutput, semanticErrHappened, semantic_stack } from './semanticAnaliser';
 import { symbolTable } from '.';
 
+export let sintaticErrHappened = false;
 let prevToken: TOKEN | null = null;
 
 const productions = [
@@ -77,7 +78,6 @@ function getProdSize(production: string) {
 function recoverFromError(currentState: number, nextToken: string, syntaxTable: syntaxTableI[], getNextToken: (correctionToken?: TOKEN) => void | TOKEN, stack: number[]) {
   const error = syntaxTable[currentState][nextToken]; 
   let errorMessage = '';
-  console.log(`erro ${error}`);
   
   if (error !== '') {
     errorMessage = `${errors[error]} esperado`;
@@ -99,7 +99,7 @@ function recoverFromError(currentState: number, nextToken: string, syntaxTable: 
     errorMessage = `esperava-se um ${expectedTokens.join(', ')}`;
   }
 
-  console.log(`Erro de sintaxe - linha ${line} coluna ${column}: ${errorMessage}, mas o token encontrado foi "${TOKEN_NAMES[nextToken] || nextToken}"`);
+  console.log(`Erro de sintaxe - linha ${line - 1} coluna ${column}: ${errorMessage}, mas o token encontrado foi "${TOKEN_NAMES[nextToken] || nextToken}"`);
   //console.log(stack);
   if(error !== '' && error !== 'E4' && error !== 'E5' && error !== 'E11') {
     let tokenToAdd: TOKEN;
@@ -173,11 +173,16 @@ export async function syntaxAnaliser(fileContent: string) {
     if(!(a instanceof TOKEN)) {
       return;
     }
+    if(a.classe === 'ERRO') {
+      a = scanner.next().value;
+      continue;
+    }
     let s = stack[stack.length - 1];
     const action = syntaxTable[s][a.classe];
     if (action === 'Acc') {
-      console.log("Aceito");
-      await generateOutput();
+      if(!lexicalErrHappened && !sintaticErrHappened && !semanticErrHappened) {
+        await generateOutput();
+      }
       return;
     } else if (action.startsWith('S')) {
       const t = parseInt(action.slice(1));
@@ -197,10 +202,11 @@ export async function syntaxAnaliser(fileContent: string) {
       stack.length -= prodSize;
       s = stack[stack.length - 1];
       stack.push(parseInt(syntaxTable[s][reductionVariable]));
-      console.log(semantic_stack);
+      //console.log(semantic_stack);
       semantic(t);
-      console.log(`Produção reduzida: ${production}`);
+      //console.log(`Produção reduzida: ${production}`);
     } else if (action === '' || action.startsWith('E')) {
+      sintaticErrHappened = true;
       stack = recoverFromError(s, a.classe, syntaxTable, (correctionToken?: TOKEN) => {
         //console.log('ta chamando a fução');
         if (!correctionToken) {
