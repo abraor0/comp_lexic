@@ -142,7 +142,6 @@ function recoverFromError(currentState: number, nextToken: string, syntaxTable: 
       const stackCopy = [...stack];
       while(stackCopy.length > 0) {
         const s = stackCopy[stackCopy.length - 1];
-        console.log(`Estado ${s} e token  ${nextToken} , valor na tabela -> ${syntaxTable[s][nextToken]}`);
         if(syntaxTable[s][nextToken] !== '' && !syntaxTable[s][nextToken].startsWith('E')) {
           //console.log(`Quebrou com a stack ${stackCopy}`);
           return stackCopy;
